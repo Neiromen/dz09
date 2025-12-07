@@ -3,8 +3,7 @@ package com.dz0912;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @RestController
 public class Controller {
@@ -28,8 +27,13 @@ public class Controller {
     }
 
     @GetMapping("/themes")
-    public ResponseEntity<List<Theme>> getAllThemes() {
-        return ResponseEntity.ok(themes);
+    public ResponseEntity<List<Theme>> getAllThemes(@RequestParam(required = false) String sortOrder) {
+        if (sortOrder == null || sortOrder.equals("minToMax")) {
+            return ResponseEntity.ok(themes);
+        } else if (Objects.equals(sortOrder, "maxToMin")) {
+            return ResponseEntity.ok(themes.reversed());
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/theme/{id}")
@@ -65,6 +69,7 @@ public class Controller {
             return ResponseEntity.badRequest().body(null);
         }
         Theme theme = themes.get(id);
+        comment.setDate(new Date());
         theme.comments.add(comment);
         return ResponseEntity.ok().build();
     }
@@ -99,22 +104,30 @@ public class Controller {
         {
             return ResponseEntity.badRequest().body(null);
         }
+        comment.setDate(new Date());
         theme.comments.set(commentId, comment);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/theme/{themeId}/comments")
-    public ResponseEntity<List<Comment>> getAllComments(@PathVariable int themeId) {
+    public ResponseEntity<List<Comment>> getAllComments(@PathVariable int themeId,
+                                                        @RequestParam(required = false) String sortOrder) {
         if (themeId < 0 || themeId >= themes.size())
         {
             return ResponseEntity.badRequest().body(null);
         }
         Theme theme = themes.get(themeId);
-        return ResponseEntity.ok(theme.comments);
+        if  (sortOrder == null || sortOrder.equals("minToMax")) {
+            return ResponseEntity.ok(theme.comments);
+        } else if (Objects.equals(sortOrder, "maxToMin")) {
+            return ResponseEntity.ok(theme.comments.reversed());
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/comments/{username}")
-    public ResponseEntity<List<Comment>> getAllCommentsByUsername(@PathVariable String username) {
+    public ResponseEntity<List<Comment>> getAllCommentsByUsername(@PathVariable String username,
+                                                                  @RequestParam(required = false) String sortOrder) {
         List<Comment> comments = new ArrayList<>();
         for(Theme theme : themes) {
             for(Comment comment : theme.comments) {
@@ -123,8 +136,12 @@ public class Controller {
                 }
             }
         }
-        return ResponseEntity.ok(comments);
-    }
+        if  (sortOrder == null || sortOrder.equals("minToMax")) {
+            return ResponseEntity.ok(comments);
+        } else if (Objects.equals(sortOrder, "maxToMin")) {
+            return ResponseEntity.ok(comments.reversed());
+        }
+        return ResponseEntity.noContent().build();    }
 
     @DeleteMapping("/comments/{username}")
     public ResponseEntity<Void> deleteAllCommentsByUsername(@PathVariable String username) {
