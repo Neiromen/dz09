@@ -19,6 +19,10 @@ public class Controller {
 
     @DeleteMapping("/theme/{id}")
     public ResponseEntity<Void> deleteTheme(@PathVariable int id) {
+        if (id < 0 || id >= themes.size())
+        {
+            return ResponseEntity.badRequest().body(null);
+        }
         themes.remove(id);
         return ResponseEntity.noContent().build();
     }
@@ -30,6 +34,10 @@ public class Controller {
 
     @PutMapping("/theme/{id}")
     public ResponseEntity<String > updateTheme(@RequestBody String title, @PathVariable int id) {
+        if (id < 0 || id >= themes.size())
+        {
+            return ResponseEntity.badRequest().body(null);
+        }
         themes.set(id, new Theme(title));
         return ResponseEntity.ok(title);
     }
@@ -52,6 +60,10 @@ public class Controller {
 
     @PostMapping("/theme/{id}/comment")
     public ResponseEntity<Void> createComment(@RequestBody Comment comment, @PathVariable int id) {
+        if (id < 0 || id >= themes.size())
+        {
+            return ResponseEntity.badRequest().body(null);
+        }
         Theme theme = themes.get(id);
         theme.comments.add(comment);
         return ResponseEntity.ok().build();
@@ -59,7 +71,16 @@ public class Controller {
 
     @DeleteMapping("/theme/{themeId}/comment/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable int themeId, @PathVariable int commentId) {
+        if (themeId < 0 || themeId >= themes.size())
+        {
+            return ResponseEntity.badRequest().body(null);
+        }
         Theme theme = themes.get(themeId);
+
+        if (commentId < 0 || commentId >= theme.comments.size())
+        {
+            return ResponseEntity.badRequest().body(null);
+        }
         theme.comments.remove(commentId);
         return ResponseEntity.ok().build();
     }
@@ -68,13 +89,26 @@ public class Controller {
     public ResponseEntity<Void> updateComment(@RequestBody Comment comment,
                                               @PathVariable int commentId,
                                               @PathVariable int themeId) {
+        if (themeId < 0 || themeId >= themes.size())
+        {
+            return ResponseEntity.badRequest().body(null);
+        }
         Theme theme = themes.get(themeId);
+
+        if (commentId < 0 || commentId >= theme.comments.size())
+        {
+            return ResponseEntity.badRequest().body(null);
+        }
         theme.comments.set(commentId, comment);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/theme/{themeId}/comments")
     public ResponseEntity<List<Comment>> getAllComments(@PathVariable int themeId) {
+        if (themeId < 0 || themeId >= themes.size())
+        {
+            return ResponseEntity.badRequest().body(null);
+        }
         Theme theme = themes.get(themeId);
         return ResponseEntity.ok(theme.comments);
     }
